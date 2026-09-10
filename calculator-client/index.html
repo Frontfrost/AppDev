@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="calculator-window">
+    <!-- แถบ History ด้านซ้าย -->
+    <aside class="sidebar">
+      <div class="window-controls">
+        <span class="control close"></span>
+        <span class="control minimize"></span>
+        <span class="control maximize"></span>
+        <button id="clear-history-btn" class="trash-btn" title="Clear History">&#128465;</button>
+      </div>
+
+      <div class="history-content">
+        <div class="history-title">Today</div>
+        <div id="today-history" class="history-list"></div>
+
+        <div class="history-title">Previous 7 Days</div>
+        <div id="past-history" class="history-list"></div>
+      </div>
+    </aside>
+
+    <!-- แผงเครื่องคิดเลขด้านขวา -->
+    <main class="calculator-body">
+      <div class="display">
+        <div id="expr-display" class="expr-line"></div>
+        <div id="result-display" class="result-line">0</div>
+      </div>
+
+      <div class="keypad">
+        <button class="btn btn-func" data-action="clear">AC</button>
+        <button class="btn btn-func" data-action="sign">⁺/₋</button>
+        <button class="btn btn-func" data-input="%">%</button>
+        <button class="btn btn-op" data-input="÷">÷</button>
+
+        <button class="btn btn-num" data-input="7">7</button>
+        <button class="btn btn-num" data-input="8">8</button>
+        <button class="btn btn-num" data-input="9">9</button>
+        <button class="btn btn-op" data-input="×">×</button>
+
+        <button class="btn btn-num" data-input="4">4</button>
+        <button class="btn btn-num" data-input="5">5</button>
+        <button class="btn btn-num" data-input="6">6</button>
+        <button class="btn btn-op" data-input="-">-</button>
+
+        <button class="btn btn-num" data-input="1">1</button>
+        <button class="btn btn-num" data-input="2">2</button>
+        <button class="btn btn-num" data-input="3">3</button>
+        <button class="btn btn-op" data-input="+">+</button>
+
+        <button class="btn btn-num icon-btn">&#128430;</button>
+        <button class="btn btn-num" data-input="0">0</button>
+        <button class="btn btn-num" data-input=".">.</button>
+        <button class="btn btn-op" data-action="calculate">=</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="index.js"></script>
+</body>
+</html>
