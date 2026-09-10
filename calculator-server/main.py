@@ -2,17 +2,18 @@ from collections import deque
 from datetime import datetime
 import math
 from asteval import Interpreter
-from calculator import expand_percent
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# นำเข้า Pydantic models ที่เพิ่งสร้าง
+from models import CalculatorLog, Expression
+
 HISTORY_MAX = 1000
-# เก็บประวัติการคำนวณในหน่วยความจำ
-history = deque(maxlen=HISTORY_MAX)
+# กำหนด type hint เป็น CalculatorLog
+history: deque[CalculatorLog] = deque(maxlen=HISTORY_MAX)
 
 app = FastAPI(title="Mini Calculator API")
 
-# เปิด CORS เพื่อให้ Frontend ยิงข้ามพอร์ตได้
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,35 +24,44 @@ app.add_middleware(
 aeval = Interpreter(minimal=True, usersyms={"pi": math.pi, "e": math.e})
 
 
+# 4.a: เปลี่ยนมารับ Expression object แทน str ธรรมดา
 @app.post("/calculate")
-def calculate(expr: str):
+def calculate(expression: Expression):
     try:
-        code = expand_percent(expr)
+        # เรียก method expand_percent() จาก Expression object โดยตรง
+        code = expression.expand_percent()
         result = aeval(code)
         if aeval.error:
             msg = "; ".join(str(e.get_error()) for e in aeval.error)
             aeval.error.clear()
-            return {"ok": False, "expr": expr, "result": "", "error": msg}
+            return {
+                "ok": False,
+                "expr": expression.expr,
+                "result": "",
+                "error": msg,
+            }
 
-        # แปลงเป็น int หากค่าเป็นจำนวนเต็มทศนิยม .0
         if isinstance(result, float) and result.is_integer():
             result = int(result)
 
-        # บันทึกประวัติ
-        history.appendleft(
-            {
-                "expr": expr,
-                "result": result,
-                "timestamp": datetime.now().isoformat(),
-            }
+        # บันทึกลง history ในรูปแบบ CalculatorLog
+        log_entry = CalculatorLog(
+            timestamp=datetime.now(), expr=expression.expr, result=result
         )
+        history.appendleft(log_entry)
 
-        return {"ok": True, "expr": expr, "result": result, "error": ""}
+        return {
+            "ok": True,
+            "expr": expression.expr,
+            "result": result,
+            "error": "",
+        }
     except Exception as e:
-        return {"ok": False, "expr": expr, "error": str(e)}
+        return {"ok": False, "expr": expression.expr, "error": str(e)}
 
 
-@app.get("/history")
+# 4.b: กำหนด response_model ให้ส่งกลับเป็น list[CalculatorLog]
+@app.get("/history", response_model=list[CalculatorLog])
 def get_history():
     return list(history)
 
@@ -60,4 +70,3 @@ def get_history():
 def clear_history():
     history.clear()
     return {"ok": True}
-
