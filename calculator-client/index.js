@@ -18,6 +18,31 @@ document.querySelectorAll(".btn").forEach((btn) => {
   });
 });
 
+// รองรับการกดจาก Keyboard
+document.addEventListener("keydown", (e) => {
+  if (/[0-9.]/.test(e.key)) {
+    handleInput(e.key);
+  } else if (["+", "-", "*", "/"].includes(e.key)) {
+    const symbolMap = { "*": "×", "/": "÷" };
+    handleInput(symbolMap[e.key] || e.key);
+  } else if (e.key === "x" || e.key === "X") {
+    handleInput("×");
+  } else if (e.key === "%") {
+    handleInput("%");
+  } else if (e.key === "Enter" || e.key === "=") {
+    e.preventDefault();
+    handleAction("calculate");
+  } else if (e.key === "Escape" || e.key.toLowerCase() === "c") {
+    handleAction("clear");
+  } else if (e.key === "Backspace") {
+    if (currentExpr) {
+      currentExpr = currentExpr.slice(0, -1);
+      exprDisplay.textContent = currentExpr;
+    }
+  }
+});
+
+
 function handleInput(char) {
   if (isEvaluated && /[0-9.]/.test(char)) {
     currentExpr = "";
@@ -45,11 +70,15 @@ function handleAction(action) {
 
 // ยิง Request ไปยัง Backend
 async function sendCalculation(rawExpr) {
-  const exprToSend = rawExpr.replace(/÷/g, "/").replace(/×/g, "*");
+  const exprToSend = rawExpr.replace(/÷/g, "/").replace(/[×xX]/g, "*");
 
   try {
-    const res = await fetch(`${API_BASE}/calculate?expr=${encodeURIComponent(exprToSend)}`, {
+    const res = await fetch(`${API_BASE}/calculate`, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ expr: exprToSend }),
     });
     const data = await res.json();
 
