@@ -1,0 +1,26 @@
+name: Testing
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Upgrade pip
+        run: pip install -U pip
+
+      - name: Install dependencies
+        run: pip install fastapi uvicorn[standard] asteval pytest httpx
+
+      - name: Run tests
+        working-directory: calculator-server
+        run: pytest -v
